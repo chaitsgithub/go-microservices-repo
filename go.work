@@ -11,4 +11,5 @@ use (
 
 	./pkg/network/httpclient
 	./pkg/network/tcpwriter
+	./pkg/storage/sqldb
 )

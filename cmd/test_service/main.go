@@ -12,6 +12,7 @@ import (
 	"chaits.org/microservices-repo/pkg/general/config"
 	"chaits.org/microservices-repo/pkg/general/logger"
 	"chaits.org/microservices-repo/pkg/network/httpclient"
+	sqldb "chaits.org/microservices-repo/pkg/storage/sqldb/connectors"
 	constants "chaits.org/microservices-repo/test_service/internal"
 )
 
@@ -28,25 +29,55 @@ func main() {
 		utilToTest = os.Args[1]
 	}
 
-	if utilToTest == "All" || utilToTest == "logger" {
+	switch true {
+	case utilToTest == "logger":
 		testLoggerUtility()
-	}
-
-	if utilToTest == "All" || utilToTest == "config" {
+	case utilToTest == "config":
 		fmt.Println()
 		testConfigUtility()
-	}
-
-	if utilToTest == "All" || utilToTest == "errors" {
+	case utilToTest == "errors":
 		fmt.Println()
 		testErrorsUtility()
-	}
-
-	if utilToTest == "All" || utilToTest == "httpclient" {
+	case utilToTest == "httpclient":
 		fmt.Println()
 		testHttpClient()
+	case utilToTest == "db":
+		testDB()
+	}
+}
+
+type Student struct {
+	id        int
+	firstName string
+	lastName  string
+	age       int
+}
+
+// Test DB
+func testDB() {
+	log.Println("Testing DB Utility")
+
+	dbConnector, err := sqldb.NewConnector(sqldb.DB_POSTGRES)
+	if err != nil {
+		log.Fatalf("Error getting DB Connector. Error : %w", err)
 	}
 
+	dbConn, err := dbConnector.Connect()
+	if err != nil {
+		log.Fatalf("Error connecting to DB. Error : %w", err)
+	}
+	defer dbConn.Close()
+
+	rows, err := dbConn.Query("select * from students")
+	if err != nil {
+		log.Fatalf("Error querying table. Error : %w", err)
+	}
+
+	for rows.Next() {
+		var s Student
+		rows.Scan(&s.id, &s.firstName, &s.lastName, &s.age)
+		log.Println(s)
+	}
 }
 
 // Test HTTP Client Utility
