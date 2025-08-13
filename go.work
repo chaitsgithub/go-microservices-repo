@@ -1,6 +1,7 @@
 go 1.24.5
 
 use (
+	./cmd/prometheus_service
 	./cmd/test_service
 	./cmd/utility_service
 
@@ -8,6 +9,7 @@ use (
 
 	./pkg/general/config
 	./pkg/general/logger
+	./pkg/general/metrics
 
 	./pkg/network/httpclient
 	./pkg/network/tcpwriter
