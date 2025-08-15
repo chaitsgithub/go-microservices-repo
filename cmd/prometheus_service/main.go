@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"math/rand"
 	"net/http"
 	"time"
 
@@ -35,7 +36,9 @@ func HelloHandler(m *ServiceMetrics) http.HandlerFunc {
 
 		// Simulate some work with a random delay to test the histogram.
 		start := time.Now()
-		time.Sleep(time.Duration(100+r.ContentLength%500) * time.Millisecond) // Simulate work
+		rand.Seed(time.Now().UnixNano())
+		num := rand.Intn(1000)
+		time.Sleep(time.Duration(100+num) * time.Millisecond) // Simulate work
 		m.requestLatency.Observe(time.Since(start).Seconds())
 
 		// Simulate an active connection using the gauge.
