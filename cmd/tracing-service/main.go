@@ -30,6 +30,7 @@ func helloHandler(w http.ResponseWriter, r *http.Request) {
 	performDBQuery(dbCtx)
 	time.Sleep(20 * time.Millisecond)
 	dbSpan.SetStatus(codes.Ok, "DB query successful")
+	dbSpan.End()
 
 	// Start another span for a cache lookup
 	cacheCtx, cacheSpan := otel.Tracer("cache-tracer").Start(ctx, "cache.lookup")
@@ -38,6 +39,7 @@ func helloHandler(w http.ResponseWriter, r *http.Request) {
 	time.Sleep(5 * time.Millisecond)
 	performCacheLookup(cacheCtx)
 	cacheSpan.SetStatus(codes.Ok, "Cache hit")
+	cacheSpan.End()
 
 	io.WriteString(w, "Hello, World!\n")
 }
@@ -59,6 +61,9 @@ func performCacheLookup(ctx context.Context) {
 	// This allows us to add events or attributes specific to the cache operation.
 	span := trace.SpanFromContext(ctx)
 	span.AddEvent("cache.check")
+
+	_, tableSpan := otel.Tracer("cache-tracer").Start(ctx, "cache.check")
+	defer tableSpan.End()
 
 	// Simulate the cache lookup time.
 	time.Sleep(5 * time.Millisecond)
