@@ -3,6 +3,7 @@ go 1.24.5
 use (
 	./cmd/prometheus_service
 	./cmd/test_service
+	./cmd/tracing-service
 	./cmd/utility_service
 
 	./pkg/errors
@@ -10,6 +11,7 @@ use (
 	./pkg/general/config
 	./pkg/general/logger
 	./pkg/general/metrics
+	./pkg/general/tracing
 
 	./pkg/network/httpclient
 	./pkg/network/tcpwriter
