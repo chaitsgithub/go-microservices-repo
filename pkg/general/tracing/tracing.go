@@ -8,15 +8,19 @@ import (
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
+	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/sdk/resource"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	semconv "go.opentelemetry.io/otel/semconv/v1.20.0"
 )
 
-func InitTracer(ctx context.Context, serviceName string) func() {
+func InitTracer(ctx context.Context, serviceName string) func() error {
 
 	// Create an OTLP trace exporter
-	exporter, err := otlptracegrpc.New(ctx, otlptracegrpc.WithInsecure())
+	exporter, err := otlptracegrpc.New(ctx,
+		otlptracegrpc.WithInsecure(),
+		otlptracegrpc.WithEndpoint(GRPC_COLLECTOR_ENDPOINT))
+
 	if err != nil {
 		log.Fatalf("failed to create OTLP trace exporter: %v", err)
 	}
@@ -41,14 +45,19 @@ func InitTracer(ctx context.Context, serviceName string) func() {
 	// Register the global trace provider
 	otel.SetTracerProvider(tp)
 
+	// Set the propagator. This is crucial for distributed tracing
+	// to pass context between services via HTTP headers.
+	otel.SetTextMapPropagator(propagation.NewCompositeTextMapPropagator(
+		propagation.TraceContext{},
+		propagation.Baggage{},
+	))
+
 	log.Println("OpenTelemetry tracer initialized.")
 
-	// Return a function to shutdown the tracer
-	return func() {
-		ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
-		defer cancel()
-		if err := tp.Shutdown(ctx); err != nil {
-			log.Fatalf("failed to shutdown trace provider: %v", err)
-		}
+	// The shutdown function ensures all spans are flushed before the application exits.
+	shutdown := func() error {
+		return tp.Shutdown(ctx)
 	}
+
+	return shutdown
 }

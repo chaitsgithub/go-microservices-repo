@@ -8,25 +8,60 @@ import (
 	"net/http"
 	"time"
 
+	"chaits.org/microservices-repo/pkg/general/tracing"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/codes"
-	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
-	"go.opentelemetry.io/otel/sdk/resource"
-	sdktrace "go.opentelemetry.io/otel/sdk/trace"
-	semconv "go.opentelemetry.io/otel/semconv/v1.20.0"
 	"go.opentelemetry.io/otel/trace"
 )
 
-// Get the global Tracer instance
-var tracer = otel.Tracer("tracer-service")
+var serviceName = "tracing-service"
 
 func helloHandler(w http.ResponseWriter, r *http.Request) {
-	span := trace.SpanFromContext(r.Context())
+	ctx := r.Context()
+	span := trace.SpanFromContext(ctx)
 	span.SetAttributes(attribute.String("handler.name", "hello-handler"))
 
+	// Start a new span to simulate a DB call
+	dbCtx, dbSpan := otel.Tracer("db-tracer").Start(ctx, "db.query")
+	defer dbSpan.End()
+	// Simulate DB operation
+	performDBQuery(dbCtx)
+	time.Sleep(20 * time.Millisecond)
+	dbSpan.SetStatus(codes.Ok, "DB query successful")
+
+	// Start another span for a cache lookup
+	cacheCtx, cacheSpan := otel.Tracer("cache-tracer").Start(ctx, "cache.lookup")
+	defer cacheSpan.End()
+	// Simulate cache lookup
+	time.Sleep(5 * time.Millisecond)
+	performCacheLookup(cacheCtx)
+	cacheSpan.SetStatus(codes.Ok, "Cache hit")
+
 	io.WriteString(w, "Hello, World!\n")
+}
+
+// performDBQuery simulates a database query.
+func performDBQuery(ctx context.Context) {
+	// Now, any nested spans or operations here will be children of the "db.query" span.
+	// For example, you could add another span for a specific table query:
+	_, tableSpan := otel.Tracer("db-tracer").Start(ctx, "db.query.users_table")
+	defer tableSpan.End()
+
+	// Simulate the actual database operation
+	time.Sleep(20 * time.Millisecond)
+}
+
+// performCacheLookup simulates a cache lookup operation.
+func performCacheLookup(ctx context.Context) {
+	// We are using the context with the "cache.lookup" span.
+	// This allows us to add events or attributes specific to the cache operation.
+	span := trace.SpanFromContext(ctx)
+	span.AddEvent("cache.check")
+
+	// Simulate the cache lookup time.
+	time.Sleep(5 * time.Millisecond)
 }
 
 func slowProcess() {
@@ -72,51 +107,9 @@ func callHello(ctx context.Context, span trace.Span, client http.Client, w http.
 	span.AddEvent("Received response from /hello", trace.WithAttributes(attribute.String("response.body", string(body))))
 }
 
-// initTracer initializes the OpenTelemetry tracer provider.
-func initTracer() func() {
-	ctx := context.Background()
-
-	// Create an OTLP trace exporter
-	exporter, err := otlptracegrpc.New(ctx, otlptracegrpc.WithInsecure())
-	if err != nil {
-		log.Fatalf("failed to create OTLP trace exporter: %v", err)
-	}
-
-	// Create a resource with service name and instance ID
-	res, err := resource.New(ctx,
-		resource.WithAttributes(
-			semconv.ServiceName("go-otel-demo-service"),
-			attribute.String("service.version", "1.0.0"),
-		),
-	)
-	if err != nil {
-		log.Fatalf("failed to create resource: %v", err)
-	}
-
-	// Create a new trace provider with the exporter
-	tp := sdktrace.NewTracerProvider(
-		sdktrace.WithBatcher(exporter, sdktrace.WithBatchTimeout(time.Second*5)),
-		sdktrace.WithResource(res),
-	)
-
-	// Register the global trace provider
-	otel.SetTracerProvider(tp)
-
-	log.Println("OpenTelemetry tracer initialized.")
-
-	// Return a function to shutdown the tracer
-	return func() {
-		ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
-		defer cancel()
-		if err := tp.Shutdown(ctx); err != nil {
-			log.Fatalf("failed to shutdown trace provider: %v", err)
-		}
-	}
-}
-
 func main() {
 
-	shutdownTracer := initTracer()
+	shutdownTracer := tracing.InitTracer(context.Background(), serviceName)
 	defer shutdownTracer()
 
 	// Use otelhttp.NewHandler to automatically create spans for incoming requests
