@@ -1,4 +1,4 @@
-package logger
+package oldlogger
 
 const (
 	LOG_TO_CONSOLE_JSON     = "LOG_TO_CONSOLE_JSON"

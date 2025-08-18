@@ -1,4 +1,4 @@
-package logger
+package oldlogger
 
 type LogEntry struct {
 	Timestamp    string                 `json:"timestamp"`
