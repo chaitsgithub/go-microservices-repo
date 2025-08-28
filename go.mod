@@ -1,4 +1,4 @@
-module chaits.org/microservices-repo
+module chaits.org/go-microservices-repo
 
 go 1.24.5
 

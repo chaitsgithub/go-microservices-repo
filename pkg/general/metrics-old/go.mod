@@ -1,4 +1,4 @@
-module chaits.org/go-microservices-repo/cmd/prometheus_service
+module chaits.org/go-microservices-repo/pkg/general/metrics-old
 
 go 1.24.5
 

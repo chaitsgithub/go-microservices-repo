@@ -9,7 +9,7 @@ import (
 	"net/http"
 	"time"
 
-	"chaits.org/microservices-repo/pkg/errors"
+	"chaits.org/go-microservices-repo/pkg/errors"
 )
 
 type HTTPClient struct {

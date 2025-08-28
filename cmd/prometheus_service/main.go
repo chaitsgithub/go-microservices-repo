@@ -7,9 +7,13 @@ import (
 	"net/http"
 	"time"
 
-	"chaits.org/microservices-repo/pkg/general/metrics"
+	"chaits.org/go-microservices-repo/pkg/general/logger"
+	"chaits.org/go-microservices-repo/pkg/general/metrics"
+	"chaits.org/go-microservices-repo/pkg/network/middleware"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
+
+const SERVICE_NAME = "prometheus"
 
 // ServiceMetrics holds all the metrics for this service.
 // This is what our microservice will depend on.
@@ -50,6 +54,7 @@ func HelloHandler(m *ServiceMetrics) http.HandlerFunc {
 }
 
 func main() {
+	logger.Init(SERVICE_NAME)
 	metricsBackend := metrics.METRICS_PROMETHEUS
 	prometheusRegistry, err := metrics.NewMetricsRegistry(metricsBackend)
 	if err != nil {
@@ -58,7 +63,7 @@ func main() {
 	serviceMetrics := NewServiceMetrics(prometheusRegistry)
 
 	// 4. Set up HTTP server routes.
-	http.Handle("/hello", HelloHandler(serviceMetrics))
+	http.Handle("/hello", middleware.WithLogging(HelloHandler(serviceMetrics)))
 	http.Handle("/metrics", promhttp.Handler()) // Expose Prometheus metrics
 
 	log.Printf("Starting server on :8080 with '%s' metrics backend", metricsBackend)

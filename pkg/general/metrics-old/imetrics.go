@@ -1,4 +1,4 @@
-package metrics
+package oldmetrics
 
 // Counter is an interface for a metric that only increases.
 type Counter interface {

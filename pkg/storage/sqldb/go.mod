@@ -1,4 +1,4 @@
-module chaits.org/microservices-repo/pkg/storage/sqldb
+module chaits.org/go-microservices-repo/pkg/storage/sqldb
 
 go 1.24.5
 

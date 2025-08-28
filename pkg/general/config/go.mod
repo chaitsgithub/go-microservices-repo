@@ -1,4 +1,4 @@
-module chaits.org/microservices-repo/pkg/general/config
+module chaits.org/go-microservices-repo/pkg/general/config
 
 go 1.24.5
 

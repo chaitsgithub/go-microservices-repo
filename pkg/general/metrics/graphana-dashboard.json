@@ -1,0 +1,150 @@
+{
+    "title": "Go Microservice Dashboard",
+    "description": "A template for a dashboard to monitor key microservice metrics using Prometheus.",
+    "panels": [
+        {
+            "id": "request_rate_graph",
+            "title": "HTTP Request Rate",
+            "type": "graph",
+            "description": "Per-second rate of all incoming HTTP requests.",
+            "targets": [
+                {
+                    "expr": "rate(http_requests_total[5m])",
+                    "legendFormat": "Request Rate"
+                }
+            ]
+        },
+        {
+            "id": "error_rate_graph",
+            "title": "HTTP Error Rate",
+            "type": "graph",
+            "description": "Per-second rate of HTTP errors (5xx status codes).",
+            "targets": [
+                {
+                    "expr": "rate(http_requests_errors_total[5m])",
+                    "legendFormat": "Error Rate"
+                }
+            ]
+        },
+        {
+            "id": "latency_p99_graph",
+            "title": "HTTP Latency (99th Percentile)",
+            "type": "graph",
+            "description": "99th percentile latency of HTTP requests, broken down by method.",
+            "targets": [
+                {
+                    "expr": "histogram_quantile(0.99, sum(rate(http_requests_duration_seconds_bucket[5m])) by (le, method))",
+                    "legendFormat": "{{method}} Latency"
+                }
+            ]
+        },
+        {
+            "id": "goroutines_gauge",
+            "title": "Active Goroutines",
+            "type": "graph",
+            "description": "Current number of goroutines running.",
+            "targets": [
+                {
+                    "expr": "go_goroutines",
+                    "legendFormat": "Goroutines"
+                }
+            ]
+        },
+        {
+            "id": "memory_usage_graph",
+            "title": "Memory Usage",
+            "type": "graph",
+            "description": "Total memory allocated by the process.",
+            "targets": [
+                {
+                    "expr": "go_memstats_alloc_bytes",
+                    "legendFormat": "Memory Usage"
+                }
+            ]
+        },
+        {
+            "id": "cpu_usage_graph",
+            "title": "CPU Usage",
+            "type": "graph",
+            "description": "Total CPU time consumed by the process.",
+            "targets": [
+                {
+                    "expr": "rate(process_cpu_seconds_total[5m])",
+                    "legendFormat": "CPU Usage"
+                }
+            ]
+        },
+        {
+            "id": "dependency_rate_graph",
+            "title": "Dependency Request Rate",
+            "type": "graph",
+            "description": "Rate of requests to external dependencies.",
+            "targets": [
+                {
+                    "expr": "rate(dependency_requests_total[5m])",
+                    "legendFormat": "{{dependency_name}}"
+                }
+            ]
+        },
+        {
+            "id": "dependency_latency_graph",
+            "title": "Dependency Latency (99th Percentile)",
+            "type": "graph",
+            "description": "99th percentile latency for each external dependency.",
+            "targets": [
+                {
+                    "expr": "histogram_quantile(0.99, sum(rate(dependency_duration_seconds_bucket[5m])) by (le, dependency_name))",
+                    "legendFormat": "{{dependency_name}} Latency"
+                }
+            ]
+        },
+        {
+            "id": "db_connections_gauge",
+            "title": "Database Connections",
+            "type": "graph",
+            "description": "Current number of open database connections.",
+            "targets": [
+                {
+                    "expr": "database_connections_open",
+                    "legendFormat": "DB Connections"
+                }
+            ]
+        },
+        {
+            "id": "user_registrations_graph",
+            "title": "User Registration Rate",
+            "type": "graph",
+            "description": "Rate of new user registrations.",
+            "targets": [
+                {
+                    "expr": "rate(user_registrations_total[5m])",
+                    "legendFormat": "Registrations"
+                }
+            ]
+        },
+        {
+            "id": "checkout_events_graph",
+            "title": "Checkout Events Rate",
+            "type": "graph",
+            "description": "Rate of completed checkout events.",
+            "targets": [
+                {
+                    "expr": "rate(checkout_events_total[5m])",
+                    "legendFormat": "Checkouts"
+                }
+            ]
+        },
+        {
+            "id": "job_queue_size_graph",
+            "title": "Job Queue Size",
+            "type": "graph",
+            "description": "Current number of pending items in the job queue.",
+            "targets": [
+                {
+                    "expr": "job_queue_size",
+                    "legendFormat": "Queue Size"
+                }
+            ]
+        }
+    ]
+}

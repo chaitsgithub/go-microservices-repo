@@ -8,19 +8,16 @@ import (
 	"os"
 	"time"
 
-	"chaits.org/microservices-repo/pkg/errors"
-	"chaits.org/microservices-repo/pkg/general/config"
-	"chaits.org/microservices-repo/pkg/general/logger"
-	"chaits.org/microservices-repo/pkg/network/httpclient"
-	sqldb "chaits.org/microservices-repo/pkg/storage/sqldb/connectors"
-	constants "chaits.org/microservices-repo/test_service/internal"
+	"chaits.org/go-microservices-repo/pkg/errors"
+	"chaits.org/go-microservices-repo/pkg/general/config"
+	"chaits.org/go-microservices-repo/pkg/general/logger"
+	"chaits.org/go-microservices-repo/pkg/network/httpclient"
+	sqldb "chaits.org/go-microservices-repo/pkg/storage/sqldb/connectors"
 )
 
-var appLogger *logger.Logger
 var appErr *errors.AppError
 
 func main() {
-	appLogger = logger.NewLogger(constants.SERVICE_NAME, constants.ENVIRONMENT)
 	var utilToTest string
 
 	if os.Args[1] == "" {
@@ -104,11 +101,7 @@ func testHttpClient() {
 
 // Code to Test Logger Utility
 func testLoggerUtility() {
-
 	log.Println("*** Testing Logger Utility")
-	appLogger.LogMessage(fmt.Sprintf("%s ran successfully #1", constants.SERVICE_NAME), logger.LogParms{})
-	// appLogger.LogMessage(fmt.Sprintf("%s ran successfully #2", constants.SERVICE_NAME), logger.LogParms{})
-	// appLogger.LogMessage(fmt.Sprintf("%s ran successfully #3", constants.SERVICE_NAME), logger.LogParms{})
 
 }
 

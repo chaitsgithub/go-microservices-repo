@@ -8,7 +8,9 @@ import (
 	"net/http"
 	"time"
 
-	"chaits.org/microservices-repo/pkg/general/tracing"
+	"chaits.org/go-microservices-repo/pkg/general/logger"
+	"chaits.org/go-microservices-repo/pkg/general/tracing"
+	"chaits.org/go-microservices-repo/pkg/network/middleware"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
@@ -114,12 +116,13 @@ func callHello(ctx context.Context, span trace.Span, client http.Client, w http.
 
 func main() {
 
+	logger.Init(serviceName)
+
 	shutdownTracer := tracing.InitTracer(context.Background(), serviceName)
 	defer shutdownTracer()
 
-	// Use otelhttp.NewHandler to automatically create spans for incoming requests
-	http.Handle("/hello", otelhttp.NewHandler(http.HandlerFunc(helloHandler), "hello-handler"))
-	http.Handle("/chain", otelhttp.NewHandler(http.HandlerFunc(chainHandler), "chain-handler"))
+	http.Handle("/hello", otelhttp.NewHandler(middleware.ChainAllHandlers(helloHandler), "hello-handler"))
+	http.Handle("/chain", otelhttp.NewHandler(middleware.ChainAllHandlers(chainHandler), "chain-handler"))
 
 	fmt.Println("Server starting on port 8080 with OpenTelemetry tracing...")
 	log.Fatal(http.ListenAndServe(":8080", nil))

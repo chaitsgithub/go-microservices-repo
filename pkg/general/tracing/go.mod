@@ -1,4 +1,4 @@
-module chaits.org/microservices-repo/pkg/general/tracing
+module chaits.org/go-microservices-repo/pkg/general/tracing
 
 go 1.24.5
 

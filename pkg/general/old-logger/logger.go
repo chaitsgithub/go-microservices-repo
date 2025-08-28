@@ -11,7 +11,7 @@ import (
 	"sync"
 	"time"
 
-	"chaits.org/microservices-repo/pkg/network/tcpwriter"
+	"chaits.org/go-microservices-repo/pkg/network/tcpwriter"
 )
 
 var (

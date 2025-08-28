@@ -1,4 +1,4 @@
-package metrics
+package oldmetrics
 
 type noopRegistry struct{}
 
