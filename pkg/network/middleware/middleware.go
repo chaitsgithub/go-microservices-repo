@@ -45,7 +45,10 @@ func Logger(next Handler) Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		start := time.Now()
 		next.ServeHTTP(w, r)
-		logger := logger.GetInstance()
+		hook, err := logger.GetLogstashHookInstance()
+		if err != nil {
+			log.Panicln("unable to get logstashhook instance")
+		}
 	})
 }
 
