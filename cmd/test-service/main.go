@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"net/http"
+	"time"
 
 	handlers "chaits.org/go-microservices-repo/internal/handlers/test-service"
 	appserver "chaits.org/go-microservices-repo/internal/server"
@@ -21,7 +22,12 @@ func main() {
 	shutdownTracer := tracing.InitTracer(context.Background(), serviceName)
 	defer shutdownTracer()
 
-	middlewares := middleware.NewManager(middleware.WithLogging, middleware.WithPrometheusMetrics(serviceName), middleware.WithCORS)
+	middlewares := middleware.NewManager(
+		middleware.WithLogging,
+		middleware.WithPrometheusMetrics(serviceName),
+		middleware.WithCORS,
+		middleware.WithRateLimiter(100, time.Minute),
+	)
 
 	http.Handle("/hello", middlewares.Then(handlers.HelloHandler, "hello-handler"))
 	http.Handle("/chain", middlewares.Then(handlers.ChainHandler, "chain-handler"))
