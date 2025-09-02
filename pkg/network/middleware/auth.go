@@ -7,13 +7,7 @@ import (
 	"chaits.org/go-microservices-repo/internal/repositories"
 )
 
-// In a real application, this would be a secure database lookup.
-var validKeys = map[string]string{
-	"app-alpha-key-1234": "app-alpha",
-	"app-beta-key-5678":  "app-beta",
-}
-
-// APIKeyAuth is a middleware that validates an API key from a request header
+// WithAPIKeyAuth is a middleware that validates an API key from a request header
 // by checking it against the database.
 func WithAPIKeyAuth(appRepo repositories.AppRepository) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
