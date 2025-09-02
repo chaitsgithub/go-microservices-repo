@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"time"
 
+	health "chaits.org/go-microservices-repo/internal/handlers"
 	handlers "chaits.org/go-microservices-repo/internal/handlers/test-service"
 	"chaits.org/go-microservices-repo/internal/repositories"
 	appserver "chaits.org/go-microservices-repo/internal/server"
@@ -38,6 +39,7 @@ func main() {
 
 	http.Handle("/hello", middlewares.Then(handlers.HelloHandler, "hello-handler"))
 	http.Handle("/chain", middlewares.Then(handlers.ChainHandler, "chain-handler"))
+	http.Handle("/health", health.HealthHandler(serviceName))
 
 	// http.Handle("/hello", otelhttp.NewHandler(middlewares.Then1(handlers.HelloHandler), "hello-handler"))
 	// http.Handle("/chain", otelhttp.NewHandler(middlewares.Then1(handlers.ChainHandler), "chain-handler"))

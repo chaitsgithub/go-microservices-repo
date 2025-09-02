@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"time"
 
+	"chaits.org/go-microservices-repo/internal/repositories"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 )
 
@@ -21,12 +22,13 @@ func NewManager(m ...func(http.Handler) http.Handler) *Manager {
 }
 
 // NewManager returns a new Manager with the given middleware.
-func AllMiddlewareManager(serviceName string) *Manager {
+func AllMiddlewareManager(serviceName string, appRepo repositories.AppRepository) *Manager {
 	return NewManager(
 		WithLogging,
 		WithPrometheusMetrics(serviceName),
 		WithCORS,
 		WithRateLimiter(100, time.Minute),
+		WithAPIKeyAuth(appRepo),
 	)
 }
 

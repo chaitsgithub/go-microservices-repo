@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 
+	health "chaits.org/go-microservices-repo/internal/handlers"
 	handlers "chaits.org/go-microservices-repo/internal/handlers/onboarding"
 	"chaits.org/go-microservices-repo/internal/repositories"
 	appserver "chaits.org/go-microservices-repo/internal/server"
@@ -20,17 +21,18 @@ func main() {
 	shutdownTracer := tracing.InitTracer(context.Background(), serviceName)
 	defer shutdownTracer()
 
-	db, err := repositories.NewMySQLDBManager()
+	repos, err := repositories.NewMySQLDBManager()
 	if err != nil {
 		logger.Logger.WithError(err).Error("error getting DB manager")
 	}
 
-	middlewares := middleware.AllMiddlewareManager(serviceName)
-	appsHandler := handlers.NewAppsHandler(db)
+	middlewares := middleware.AllMiddlewareManager(serviceName, repos.AppRepo)
+	appsHandler := handlers.NewAppsHandler(repos)
 
 	http.Handle("/apps/list", middlewares.Then(appsHandler.GetAppsHandler, "getapps-handler"))
 	http.Handle("/apps/create", middlewares.Then(appsHandler.RegisterAppHandler, "register-app-handler"))
 	http.Handle("/apps/delete", middlewares.Then(appsHandler.RevokeAppHandler, "revoke-app-handler"))
+	http.Handle("/health", health.HealthHandler(serviceName))
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, "index.html")
 	})
