@@ -5,7 +5,13 @@
         {
             "id": "request_rate_graph",
             "title": "HTTP Request Rate",
-            "type": "graph",
+            "type": "timeseries",
+            "gridPos": {
+                "x": 0,
+                "y": 0,
+                "w": 8,
+                "h": 8
+            },
             "description": "Per-second rate of all incoming HTTP requests.",
             "targets": [
                 {
@@ -17,7 +23,13 @@
         {
             "id": "error_rate_graph",
             "title": "HTTP Error Rate",
-            "type": "graph",
+            "type": "timeseries",
+            "gridPos": {
+                "x": 8,
+                "y": 0,
+                "w": 8,
+                "h": 8
+            },
             "description": "Per-second rate of HTTP errors (5xx status codes).",
             "targets": [
                 {
@@ -29,7 +41,13 @@
         {
             "id": "latency_p99_graph",
             "title": "HTTP Latency (99th Percentile)",
-            "type": "graph",
+            "type": "bargauge",
+            "gridPos": {
+                "x": 16,
+                "y": 0,
+                "w": 8,
+                "h": 8
+            },
             "description": "99th percentile latency of HTTP requests, broken down by method.",
             "targets": [
                 {
@@ -41,7 +59,13 @@
         {
             "id": "goroutines_gauge",
             "title": "Active Goroutines",
-            "type": "graph",
+            "type": "stat",
+            "gridPos": {
+                "x": 0,
+                "y": 8,
+                "w": 8,
+                "h": 8
+            },
             "description": "Current number of goroutines running.",
             "targets": [
                 {
@@ -53,7 +77,13 @@
         {
             "id": "memory_usage_graph",
             "title": "Memory Usage",
-            "type": "graph",
+            "type": "timeseries",
+            "gridPos": {
+                "x": 8,
+                "y": 8,
+                "w": 8,
+                "h": 8
+            },
             "description": "Total memory allocated by the process.",
             "targets": [
                 {
@@ -65,7 +95,13 @@
         {
             "id": "cpu_usage_graph",
             "title": "CPU Usage",
-            "type": "graph",
+            "type": "timeseries",
+            "gridPos": {
+                "x": 16,
+                "y": 8,
+                "w": 8,
+                "h": 8
+            },
             "description": "Total CPU time consumed by the process.",
             "targets": [
                 {
@@ -77,7 +113,13 @@
         {
             "id": "dependency_rate_graph",
             "title": "Dependency Request Rate",
-            "type": "graph",
+            "type": "timeseries",
+            "gridPos": {
+                "x": 0,
+                "y": 16,
+                "w": 8,
+                "h": 8
+            },
             "description": "Rate of requests to external dependencies.",
             "targets": [
                 {
@@ -89,7 +131,13 @@
         {
             "id": "dependency_latency_graph",
             "title": "Dependency Latency (99th Percentile)",
-            "type": "graph",
+            "type": "bargauge",
+            "gridPos": {
+                "x": 8,
+                "y": 16,
+                "w": 8,
+                "h": 8
+            },
             "description": "99th percentile latency for each external dependency.",
             "targets": [
                 {
@@ -101,7 +149,13 @@
         {
             "id": "db_connections_gauge",
             "title": "Database Connections",
-            "type": "graph",
+            "type": "gauge",
+            "gridPos": {
+                "x": 16,
+                "y": 16,
+                "w": 8,
+                "h": 8
+            },
             "description": "Current number of open database connections.",
             "targets": [
                 {
@@ -113,7 +167,13 @@
         {
             "id": "user_registrations_graph",
             "title": "User Registration Rate",
-            "type": "graph",
+            "type": "timeseries",
+            "gridPos": {
+                "x": 0,
+                "y": 24,
+                "w": 8,
+                "h": 8
+            },
             "description": "Rate of new user registrations.",
             "targets": [
                 {
@@ -125,7 +185,13 @@
         {
             "id": "checkout_events_graph",
             "title": "Checkout Events Rate",
-            "type": "graph",
+            "type": "timeseries",
+            "gridPos": {
+                "x": 8,
+                "y": 24,
+                "w": 8,
+                "h": 8
+            },
             "description": "Rate of completed checkout events.",
             "targets": [
                 {
@@ -137,7 +203,13 @@
         {
             "id": "job_queue_size_graph",
             "title": "Job Queue Size",
-            "type": "graph",
+            "type": "gauge",
+            "gridPos": {
+                "x": 16,
+                "y": 24,
+                "w": 8,
+                "h": 8
+            },
             "description": "Current number of pending items in the job queue.",
             "targets": [
                 {

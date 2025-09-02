@@ -6,6 +6,7 @@ import (
 	"time"
 
 	handlers "chaits.org/go-microservices-repo/internal/handlers/test-service"
+	"chaits.org/go-microservices-repo/internal/repositories"
 	appserver "chaits.org/go-microservices-repo/internal/server"
 	"chaits.org/go-microservices-repo/pkg/general/logger"
 	"chaits.org/go-microservices-repo/pkg/general/tracing"
@@ -22,11 +23,17 @@ func main() {
 	shutdownTracer := tracing.InitTracer(context.Background(), serviceName)
 	defer shutdownTracer()
 
+	repos, err := repositories.NewMySQLDBManager()
+	if err != nil {
+		logger.Logger.WithError(err).Fatal("DB Error")
+	}
+
 	middlewares := middleware.NewManager(
 		middleware.WithLogging,
 		middleware.WithPrometheusMetrics(serviceName),
 		middleware.WithCORS,
 		middleware.WithRateLimiter(100, time.Minute),
+		middleware.WithAPIKeyAuth(repos.AppRepo),
 	)
 
 	http.Handle("/hello", middlewares.Then(handlers.HelloHandler, "hello-handler"))
@@ -38,7 +45,7 @@ func main() {
 	// http.Handle("/hello", otelhttp.NewHandler(middleware.ChainAllHandlers(handlers.HelloHandler, serviceName), "hello-handler"))
 	// http.Handle("/chain", otelhttp.NewHandler(middleware.ChainAllHandlers(handlers.ChainHandler, serviceName), "chain-handler"))
 
-	server := &http.Server{Addr: ":8080"}
+	server := &http.Server{Addr: ":8081"}
 	http.Handle("/metrics", promhttp.Handler())
 	appserver.StartServer(serviceName, server)
 	// log.Fatal(http.ListenAndServe(":8080", nil))

@@ -1,0 +1,10 @@
+GET http://localhost:8080/apps/list
+###
+POST http://localhost:8080/apps/create
+Content-Type: application/json
+
+{
+    "name":"TRAX"
+}
+###
+DELETE http://localhost:8080/apps/delete?id=5

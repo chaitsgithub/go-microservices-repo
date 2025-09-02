@@ -1,0 +1,9 @@
+GET http://localhost:8081/hello
+X-App-Name: trax
+X-API-Key: 997e88601938178169649ae559db4d921759ccf952e32bac10e35b445ea577b4
+###
+
+POST http://localhost:8080/apps/create
+Content-Type: application/json
+
+{"name":"TRAC"}

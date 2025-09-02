@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>App Onboarding with MySQL</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-100 min-h-screen flex items-center justify-center p-4">
+    <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-2xl">
+        <h1 class="text-3xl font-bold text-center text-gray-800 mb-6">Application Onboarding</h1>
+        <p class="text-center text-gray-600 mb-8">
+            This UI communicates with a Go backend and a MySQL database for secure key management.
+        </p>
+
+        <!-- API Key Generation Form -->
+        <div class="bg-gray-50 p-6 rounded-lg mb-6 shadow-sm">
+            <h2 class="text-xl font-semibold text-gray-700 mb-4">Register a New App</h2>
+            <div class="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-4">
+                <input type="text" id="appNameInput" placeholder="Enter app name..."
+                    class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors">
+                <button id="generateKeyBtn"
+                    class="w-full sm:w-auto bg-blue-600 text-white p-3 rounded-lg font-semibold shadow-md hover:bg-blue-700 transition-colors">Generate
+                    API Key</button>
+            </div>
+
+            <!-- Key Display Message Box -->
+            <div id="apiKeyMessage"
+                class="hidden mt-4 p-4 bg-green-100 text-green-800 rounded-lg text-sm leading-relaxed border-l-4 border-green-500">
+                <p><strong>Success!</strong> Your API key has been generated.</p>
+                <div class="flex items-center mt-2 space-x-2">
+                    <code id="generatedKey"
+                        class="flex-1 bg-white p-2 rounded text-gray-900 overflow-hidden text-ellipsis"></code>
+                    <button id="copyKeyBtn"
+                        class="bg-green-500 text-white p-2 rounded-lg text-xs font-bold hover:bg-green-600 transition-colors">Copy</button>
+                </div>
+                <p class="mt-2 text-red-700 font-semibold">
+                    Note: This key is only shown once. Copy it now!
+                </p>
+            </div>
+        </div>
+
+        <!-- Registered Apps List -->
+        <div>
+            <h2 class="text-xl font-semibold text-gray-700 mb-4">Registered Apps</h2>
+            <ul id="appList" class="space-y-4">
+                <!-- Apps will be dynamically added here -->
+                <li id="loadingMessage" class="text-center text-gray-500">Loading registered apps...</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // NOTE: This client-side approach is for demonstration only. A real-world application must
+        // secure API key generation and management with proper authentication and server-side logic.
+
+        const appNameInput = document.getElementById('appNameInput');
+        const generateKeyBtn = document.getElementById('generateKeyBtn');
+        const appList = document.getElementById('appList');
+        const apiKeyMessage = document.getElementById('apiKeyMessage');
+        const generatedKey = document.getElementById('generatedKey');
+        const copyKeyBtn = document.getElementById('copyKeyBtn');
+        const loadingMessage = document.getElementById('loadingMessage');
+
+        // Function to fetch and render the list of apps from the Go backend
+        async function renderApps() {
+            try {
+                loadingMessage.textContent = 'Loading registered apps...';
+                const response = await fetch('/get_apps');
+                const apps = await response.json();
+
+                appList.innerHTML = ''; // Clear previous list
+                if (apps.length === 0) {
+                    appList.innerHTML = '<li class="text-center text-gray-500">No apps registered yet.</li>';
+                } else {
+                    apps.forEach(app => {
+                        const li = document.createElement('li');
+                        li.className = 'flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 bg-gray-50 rounded-lg shadow-sm space-y-2 sm:space-y-0';
+
+                        const appNameSpan = document.createElement('span');
+                        appNameSpan.textContent = app.name;
+                        appNameSpan.className = 'font-medium text-gray-800 break-words flex-1';
+
+                        const revokeBtn = document.createElement('button');
+                        revokeBtn.textContent = 'Revoke Key';
+                        revokeBtn.className = 'bg-red-500 text-white p-2 rounded-md text-sm font-semibold shadow-sm hover:bg-red-600 transition-colors';
+                        revokeBtn.addEventListener('click', async () => {
+                            await revokeApp(app.id);
+                        });
+
+                        li.appendChild(appNameSpan);
+                        li.appendChild(revokeBtn);
+                        appList.appendChild(li);
+                    });
+                }
+            } catch (error) {
+                console.error('Failed to fetch apps:', error);
+                loadingMessage.textContent = 'Failed to load apps. Is the backend running?';
+            }
+        }
+
+        // Function to register a new app by calling the Go backend
+        async function registerApp(appName) {
+            try {
+                const response = await fetch('/register_app', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ app_name: appName })
+                });
+                const result = await response.json();
+
+                if (response.ok) {
+                    generatedKey.textContent = result.api_key;
+                    apiKeyMessage.classList.remove('hidden');
+                    appNameInput.value = '';
+                    renderApps(); // Refresh the list
+                } else {
+                    console.error('Registration failed:', result.error);
+                    // Use a more user-friendly message box for errors
+                    showErrorMessage(result.error);
+                }
+            } catch (error) {
+                console.error('Network or server error:', error);
+                showErrorMessage('Could not connect to the backend server.');
+            }
+        }
+
+        // Function to revoke an app by calling the Go backend
+        async function revokeApp(appId) {
+            try {
+                const response = await fetch('/revoke_app', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id: appId })
+                });
+
+                if (response.ok) {
+                    renderApps(); // Refresh the list
+                } else {
+                    const result = await response.json();
+                    console.error('Revocation failed:', result.error);
+                    showErrorMessage(result.error);
+                }
+            } catch (error) {
+                console.error('Network or server error:', error);
+                showErrorMessage('Could not connect to the backend server.');
+            }
+        }
+
+        // Simple error message display
+        function showErrorMessage(message) {
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'mt-4 p-4 bg-red-100 text-red-800 rounded-lg text-sm leading-relaxed border-l-4 border-red-500';
+            errorDiv.innerHTML = `<p><strong>Error!</strong> ${message}</p>`;
+            document.querySelector('.bg-gray-50').appendChild(errorDiv);
+            setTimeout(() => errorDiv.remove(), 5000);
+        }
+
+        // Event listener for the generate key button
+        generateKeyBtn.addEventListener('click', () => {
+            const appName = appNameInput.value.trim();
+            if (appName) {
+                apiKeyMessage.classList.add('hidden'); // Hide previous message
+                registerApp(appName);
+            }
+        });
+
+        // Add event listener for copy key button
+        copyKeyBtn.addEventListener('click', () => {
+            navigator.clipboard.writeText(generatedKey.textContent).then(() => {
+                const originalText = copyKeyBtn.textContent;
+                copyKeyBtn.textContent = 'Copied!';
+                setTimeout(() => {
+                    copyKeyBtn.textContent = originalText;
+                }, 2000);
+            }).catch(err => {
+                console.error('Failed to copy text: ', err);
+            });
+        });
+
+        // Load apps on page load
+        window.onload = renderApps;
+    </script>
+</body>
+
+</html>

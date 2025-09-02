@@ -73,7 +73,6 @@ func WithLogging(next http.Handler) http.Handler {
 
 		// Call the next handler in the chain.
 		next.ServeHTTP(lrw, r)
-
 		// Get the trace ID from the request context.
 		traceID := getOtelTraceID(r.Context())
 

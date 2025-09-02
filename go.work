@@ -1,10 +1,16 @@
 go 1.24.5
 
 use (
+	./cmd/onboarding
 	./cmd/prometheus_service
+	./cmd/test-service
 	./cmd/test_code
-	./cmd/tracing-service
 	./cmd/utility_service
+
+	./internal/handlers
+	./internal/models
+	./internal/repositories
+	./internal/server
 
 	./pkg/errors
 
@@ -16,5 +22,6 @@ use (
 	./pkg/network/httpclient
 	./pkg/network/middleware
 	./pkg/network/tcpwriter
+	./pkg/security/jwt
 	./pkg/storage/sqldb
 )

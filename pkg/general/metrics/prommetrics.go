@@ -17,7 +17,7 @@ var (
 			Name: "http_requests_total",
 			Help: "Total number of HTTP requests.",
 		},
-		[]string{"method", "path", "status_code"},
+		[]string{"serviceName", "method", "path", "status_code"},
 	)
 
 	// HttpRequestDurationSeconds is a HistogramVec to measure request duration.
@@ -28,7 +28,7 @@ var (
 			Help:    "Duration of HTTP requests in seconds.",
 			Buckets: prometheus.DefBuckets,
 		},
-		[]string{"method", "path", "status_code"},
+		[]string{"serviceName", "method", "path", "status_code"},
 	)
 
 	// HttpRequestsErrorsTotal is a CounterVec for HTTP requests that result in errors.
@@ -38,7 +38,7 @@ var (
 			Name: "http_requests_errors_total",
 			Help: "Total number of HTTP requests that resulted in an error.",
 		},
-		[]string{"method", "path"},
+		[]string{"serviceName", "method", "path"},
 	)
 )
 

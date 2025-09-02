@@ -11,14 +11,14 @@ import (
 // RecordHTTPRequest records a single HTTP request, updating the total count,
 // duration, and error count (if applicable).
 // It should be called after a request has been handled.
-func RecordHTTPRequest(method, path string, statusCode int, duration time.Duration) {
+func RecordHTTPRequest(serviceName, method, path string, statusCode int, duration time.Duration) {
 	status := strconv.Itoa(statusCode)
-	HTTPRequestTotal.WithLabelValues(method, path, status).Inc()
-	HTTPRequestDurationSeconds.WithLabelValues(method, path, status).Observe(duration.Seconds())
+	HTTPRequestTotal.WithLabelValues(serviceName, method, path, status).Inc()
+	HTTPRequestDurationSeconds.WithLabelValues(serviceName, method, path, status).Observe(duration.Seconds())
 
 	// Increment the error counter if the status code indicates an error (5xx).
 	if statusCode >= 500 && statusCode < 600 {
-		HTTPRequestsErrorsTotal.WithLabelValues(method, path).Inc()
+		HTTPRequestsErrorsTotal.WithLabelValues(serviceName, method, path).Inc()
 	}
 }
 
