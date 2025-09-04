@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{.ServiceName}} UI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f0f4f8;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+    <div class="bg-white p-8 rounded-xl shadow-lg w-full max-w-lg">
+        <h1 class="text-3xl font-bold text-center text-gray-800 mb-6">{{.ServiceName}}</h1>
+        <p class="text-center text-gray-600 mb-8">
+            This is the automatically generated UI for your new service, running on port {{.Port}}.
+        </p>
+
+        <!-- Service Endpoints -->
+        <div class="flex flex-col items-center space-y-4">
+            {{range .Handlers}}
+            <button
+                class="check-btn bg-blue-600 text-white p-3 rounded-lg font-semibold shadow-md hover:bg-blue-700 transition-colors w-full"
+                data-path="{{.Path}}">
+                Test {{.Name}} ({{.Path}})
+            </button>
+            {{end}}
+        </div>
+        <p id="status-message" class="mt-4 text-center text-sm font-medium"></p>
+
+        <script>
+            document.querySelectorAll('.check-btn').forEach(button => {
+                button.addEventListener('click', async () => {
+                    const path = button.dataset.path;
+                    const statusMessage = document.getElementById('status-message');
+                    try {
+                        const response = await fetch(`http://localhost:{{.Port}}${path}`);
+                        if (response.ok) {
+                            const message = await response.text();
+                            statusMessage.textContent = `Status: OK. Response from ${path}: "${message}"`;
+                            statusMessage.className = "mt-4 text-center text-sm font-medium text-green-600";
+                        } else {
+                            statusMessage.textContent = `Status: ERROR. Could not connect to the service at ${path}.`;
+                            statusMessage.className = "mt-4 text-center text-sm font-medium text-red-600";
+                        }
+                    } catch (error) {
+                        statusMessage.textContent = `Status: ERROR. Could not connect to the service at ${path}.`;
+                        statusMessage.className = "mt-4 text-center text-sm font-medium text-red-600";
+                        console.error('Error fetching status:', error);
+                    }
+                });
+            });
+        </script>
+    </div>
+
+</body>
+
+</html>

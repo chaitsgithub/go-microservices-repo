@@ -1,0 +1,56 @@
+package main
+
+import (
+"context"
+"net/http"
+"time"
+"fmt"
+"log"
+
+  health "chaits.org/go-microservices-repo/internal/handlers"
+  handlers "chaits.org/go-microservices-repo/internal/handlers/test-service"
+  "chaits.org/go-microservices-repo/internal/repositories"
+  appserver "chaits.org/go-microservices-repo/internal/server"
+  "chaits.org/go-microservices-repo/pkg/general/logger"
+  "chaits.org/go-microservices-repo/pkg/general/tracing"
+  "chaits.org/go-microservices-repo/pkg/network/middleware"
+  "github.com/prometheus/client_golang/prometheus/promhttp"
+
+)
+
+var serviceName = "{{.ServiceName}}"
+
+func main() {
+
+    logger.Init(serviceName)
+
+    shutdownTracer := tracing.InitTracer(context.Background(), serviceName)
+    defer shutdownTracer()
+
+    repos, err := repositories.NewMySQLDBManager()
+    if err != nil {
+        logger.Logger.WithError(err).Fatal("DB Error")
+    }
+
+    middlewares := middleware.NewManager(
+        middleware.WithLogging,
+        middleware.WithPrometheusMetrics(serviceName),
+        middleware.WithCORS,
+        middleware.WithRateLimiter(100, time.Minute),
+        middleware.WithAPIKeyAuth(repos.AppRepo),
+    )
+
+    mux := http.NewServeMux()
+
+    // Register the Health handler
+    mux.Handle("/health", health.HealthHandler(serviceName))
+
+    {{range .Handlers}}// Register the {{.Name}} handler
+    mux.Handle("{{.Path}}", middlewares.Then(handlers.{{.Name}}Handler, "{{.Name}}-handler"))
+    {{end}}
+
+    server := &http.Server{Addr: fmt.Sprintf(":%s", "{{.Port}}")}
+    mux.Handle("/metrics", promhttp.Handler())
+    appserver.StartServer(serviceName, server)
+
+}

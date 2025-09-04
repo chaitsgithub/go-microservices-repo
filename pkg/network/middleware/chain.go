@@ -21,7 +21,7 @@ func NewManager(m ...func(http.Handler) http.Handler) *Manager {
 	}
 }
 
-// NewManager returns a new Manager with the given middleware.
+// AllMiddlewareManager returns a new Manager with the given middleware.
 func AllMiddlewareManager(serviceName string, appRepo repositories.AppRepository) *Manager {
 	return NewManager(
 		WithLogging,

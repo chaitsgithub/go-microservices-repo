@@ -90,6 +90,7 @@ func (r *appRepository) DeleteApp(ctx context.Context, id int) (sql.Result, erro
 	return r.db.Exec("DELETE FROM apps WHERE id = ?", id)
 }
 
+// ValidateAPIKey - Validates API Key against apps table
 func (r *appRepository) ValidateAPIKey(ctx context.Context, appName, apiKey string) (string, bool, error) {
 	_, span := otel.Tracer("db-tracer").Start(ctx, "db.validate_api_key")
 	defer span.End()

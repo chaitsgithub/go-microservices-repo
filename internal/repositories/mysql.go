@@ -10,7 +10,7 @@ type DBManager struct {
 	AppRepo AppRepository
 }
 
-// NewDBManager initializes the database connection and repositories.
+// NewMySQLDBManager initializes the database connection and repositories.
 func NewMySQLDBManager() (*DBManager, error) {
 	dbconn, _ := sqldb.NewConnector(sqldb.DB_MYSQL)
 

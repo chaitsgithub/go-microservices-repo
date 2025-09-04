@@ -3,6 +3,7 @@ go 1.24.5
 use (
 	./cmd/onboarding
 	./cmd/prometheus_service
+	./cmd/servicegenerator
 	./cmd/test-service
 	./cmd/test_code
 	./cmd/utility_service
